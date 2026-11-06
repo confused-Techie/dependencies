@@ -1,6 +1,7 @@
 const getDepTree = require("get-dep-tree");
 const convert = require("./convert.js");
 const stats = require("./stats.js");
+const optimize = require("./optimizations.js");
 
 getDepTree("actual").then((tree) => {
   const graph = convert(tree);
@@ -20,6 +21,7 @@ getDepTree("actual").then((tree) => {
 
   console.log("Highest Duplicate Packages Version Distribution:");
   statistics.highestDuplicateCounts.forEach((value, key, map) => {
+  //statistics.duplicateDependencies.forEach((value, key, map) => {
     const vers = versionDistribution(graph, key);
     console.log(`Package '${key}'; Versions:`);
     vers.forEach((element) => {
@@ -50,6 +52,12 @@ getDepTree("actual").then((tree) => {
 
   console.log(`Unresolved Dependency Count: ${graph.getAttribute("unresolved").length}`);
 
+  const invNodes = graph.filterNodes((key, attrib) => attrib.name === "emoji-regex");
+
+  //console.log(invNodes);
+
+  //optimize.versionPlacement(graph, statistics.highestDuplicateCounts);
+  optimize.checkVersionPlacement(graph, statistics.duplicateDependencies);
   //console.log(getInstallLocations(graph, "@babel/core", "7.28.4"));
   // const babelNodes = graph.filterNodes((key, attrib) =>
   //   attrib.name === "@babel/core" && attrib.version === "7.28.4"
