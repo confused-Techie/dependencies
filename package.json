@@ -7,10 +7,14 @@
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "investigate-dependencies": "./bin/cli.js"
+  },
   "author": "confused-Techie",
   "license": "MIT",
   "dependencies": {
     "get-dep-tree": "^2.0.1",
-    "graphology": "^0.26.0"
+    "graphology": "^0.26.0",
+    "yargs": "^18.2.0"
   }
 }
