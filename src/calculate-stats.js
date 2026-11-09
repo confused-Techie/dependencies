@@ -317,6 +317,85 @@ function getInstalledInstances(graph, depName) {
   return instances;
 }
 
+function getRemovalImpact(graph, name) {
+  const root = getRootKey(graph);
+  const before = getRootReachability(graph, root);
+
+  const instances = getInstalledInstances(graph, name);
+
+  const simulatedGraph = graph.copy();
+
+  const removedEdges = new Set();
+
+  for (const instance of instances.keys()) {
+    const requirements = getIncomingRequirements(graph, instance);
+
+    for (const requirement of requirements) {
+      removedEdges.add(requirement.edge);
+    }
+  }
+
+  for (const edge of removedEdges) {
+    simulatedGraph.dropEdge(edge);
+  }
+
+  const after = getRootReachability(simulatedGraph, root);
+
+  const eliminated = [...before].filter(node => !after.has(node));
+
+  const uniquePackages = new Set(
+    eliminated.map(node => graph.getNodeAttribute(node, "name"))
+  );
+
+  return {
+    name: name,
+    affectedInstances: instances.size,
+    removedRequirements: removedEdges.size,
+    eliminatedInstances: eliminated.length,
+    eliminatedUniquePackages: uniquePackages.size,
+    eliminatedNodes: eliminated,
+    eliminatedPackages: [...uniquePackages]
+  };
+}
+
+function getHighestRemovalImpact(graph, opts = {}) {
+  const scope = opts.scope ?? "all";
+  const limit = opts.limit ?? 5;
+
+  const root = getRootKey(graph);
+
+  // All packages directly required by the project
+  const directDependencies = new Set(
+    graph.outNeighbors(root).map(node => graph.getNodeAttribute(node, "name"))
+  );
+
+  const results = [];
+
+  for (const name of getUniqueDependencies(graph)) {
+    // Exclude the project itself
+    if (name === graph.getNodeAttribute(root, "name")) continue;
+
+    const isDirect = directDependencies.has(name);
+
+    if (scope === "direct" && !isDirect) continue;
+    if (scope === "transitive" && isDirect) continue;
+
+    const impact = getRemovalImpact(graph, name);
+
+    results.push({
+      name,
+      direct: isDirect,
+      eliminated: impact.eliminatedInstances,
+      uniqueEliminated: impact.eliminatedUniquePackages,
+      removedRelationships: impact.removedRequirements
+    });
+  }
+
+  return results
+    .sort((a, b) => b.eliminated - a.eliminated)
+    .slice(0, limit);
+}
+
 module.exports = {
   getRootKey,
   getReachabilityList,
@@ -335,4 +414,6 @@ module.exports = {
   analyzeVersionPlacement,
   getInstalledInstances,
   getIncomingRequirements,
+  getRemovalImpact,
+  getHighestRemovalImpact,
 };

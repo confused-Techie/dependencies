@@ -4,12 +4,15 @@ function print(graph, argv) {
   if (argv.facts === "all") {
     printBasic(graph, argv);
     printConsumers(graph, argv);
+    printRemovalImpact(graph, argv);
   } else {
     switch(argv.facts) {
       case "basic":
         printBasic(graph, argv);
       case "consumers":
         printConsumers(graph, argv);
+      case "removal-impact":
+        printRemovalImpact(graph, argv);
       default:
         break;
     }
@@ -48,6 +51,32 @@ function printConsumers(graph, argv) {
     requirements.forEach((element) => {
       console.log(`\t\t- ${element.consumer}   ${element.requirement}   ${element.type}`);
     });
+  });
+}
+
+function printRemovalImpact(graph, argv) {
+  const name = argv.dependency;
+
+  const removalImpact = calc.getRemovalImpact(graph, name);
+
+  console.log(`Simulated Removal Impact of '${name}'`);
+  console.log(`\t- Affected Instances of '${name}': ${removalImpact.affectedInstances}`);
+  console.log(`\t- Eliminated Instances: ${removalImpact.eliminatedInstances} (${Number((removalImpact.eliminatedInstances / graph.order) * 100).toFixed(2)}% of installed tree)`);
+  console.log(`\t- Eliminated Unique Packages: ${removalImpact.eliminatedUniquePackages}`);
+  console.log(`\t- Removed Relationships: ${removalImpact.removedRequirements}`);
+  console.log(`\t- Removed Packages:`);
+  let listedRemoved = 0;
+  let listedEllipses = false;
+  removalImpact.eliminatedPackages.forEach((element) => {
+    if (listedRemoved < 15) {
+      listedRemoved += 1;
+      console.log(`\t\t- '${element}'`);
+    } else {
+      if (!listedEllipses) {
+        listedEllipses = true;
+        console.log("\t\t...");
+      }
+    }
   });
 }
 

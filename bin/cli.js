@@ -22,8 +22,12 @@ const argv = yargs(process.argv.slice(2))
   })
   .option("facts", {
     describe: "The type of facts to display for a specific dependency.",
-    choices: [ "basic", "consumers", "all" ],
+    choices: [ "basic", "consumers", "removal-impact", "all" ],
     default: "basic"
+  })
+  .option("ask", {
+    describe: "Ask a question about the overall graph.",
+    choices: [ "highest-removal-impact" ]
   })
   .parse();
 argv.cwd = process.cwd();
