@@ -1,4 +1,5 @@
 const calc = require("./calculate-stats.js");
+const utils = require("./utils.js");
 
 function print(graph, argv) {
   if (argv.reports === "all") {
@@ -32,6 +33,11 @@ function printBasic(graph, argv) {
   console.log(`\t- Total: ${graph.order}`);
   console.log(`\t- Reachable: ${reachabilityList.reachable.size}`);
   console.log(`\t- Unreachable: ${reachabilityList.unreachable.length}`);
+  const largest = calc.getLargestDependencies(graph);
+  console.log("Largest Dependencies:");
+  largest.forEach((element) => {
+    console.log(`\t- '${graph.getNodeAttribute(element.node, "name")}': ${utils.humanFileSize(element.size)}`);
+  });
 }
 
 function printDuplicates(graph, argv) {

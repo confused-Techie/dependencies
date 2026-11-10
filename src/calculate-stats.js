@@ -107,6 +107,23 @@ function getHighThreeDuplicateDependencies(graph) {
   return highest;
 }
 
+function getLargestDependencies(graph) {
+  const largest = [];
+
+  graph.forEachNode((node, attrib) => {
+    if (node === getRootKey(graph)) return;
+    const size = attrib.size;
+    largest.push({ node, size });
+    largest.sort((a, b) => b.size - a.size);
+
+    if (largest.length > 10) {
+      largest.pop();
+    }
+  });
+
+  return largest;
+}
+
 function getHighestDuplicateDependencies(graph) {
   const dups = getDuplicateDependencies(graph);
   let highestCount = 0;
@@ -416,4 +433,5 @@ module.exports = {
   getIncomingRequirements,
   getRemovalImpact,
   getHighestRemovalImpact,
+  getLargestDependencies,
 };

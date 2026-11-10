@@ -1,4 +1,5 @@
 const calc = require("./calculate-stats.js");
+const utils = require("./utils.js");
 
 function print(graph, argv) {
   if (argv.facts === "all") {
@@ -34,7 +35,9 @@ function printBasic(graph, argv) {
   });
   console.log("\tInstall Locations:");
   installed.forEach((value, key, map) => {
-    console.log(`\t- '${key}'#${value}`);
+    console.log(`\t- '${key}'`);
+    console.log(`\t\t- Version: ${value}`);
+    console.log(`\t\t- Size: ${utils.humanFileSize(graph.getNodeAttribute(key, "size"))}`);
   });
 }
 
